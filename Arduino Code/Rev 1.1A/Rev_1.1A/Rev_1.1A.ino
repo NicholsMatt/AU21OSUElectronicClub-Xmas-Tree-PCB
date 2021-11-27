@@ -122,7 +122,7 @@ pinMode(topPad, INPUT);
 pinMode(leftPad, INPUT);
 pinMode(rightPad, INPUT);
 
-
+/*
 SoftPWMBegin();
 SoftPWMSet(2, 0);
 SoftPWMSet(3, 0);
@@ -135,7 +135,7 @@ SoftPWMSet(4, 0);
  SoftPWMSet(10, 0);
  SoftPWMSet(11, 0);
  SoftPWMSetFadeTime(ALL, 500, 500);
-
+*/
 }
 
 void loop() {
@@ -192,7 +192,7 @@ void playSong(int songName[], int tempo, int notes, int wholenote){
 
 
 void defaultLights(){
-  
+  /*
     SoftPWMSet(ALL, 255);
   // Wait for the fade-up and some extra delay.
   delay(1000);
@@ -202,6 +202,6 @@ void defaultLights(){
   // Wait for the fade-down, and some extra delay.
 
   delay(1000);
- 
+ */
   
 }
