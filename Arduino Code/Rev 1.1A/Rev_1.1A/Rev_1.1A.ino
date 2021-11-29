@@ -27,12 +27,22 @@ Also special thanks to the officers of the OSU Electronics Club. Without your su
 *November 26, 2021 - First initial working version completed.
 */
 
-int buzzer   = 12;
-int topPad   = 14;
-int leftPad  = 15;
-int rightPad = 16;
+/*GLOBAL VARIABLES*/
+int buzzer   = 12;  //Buzzer pin
 
-int LEDs[10] = {2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+int topPad   = 14;  //Top touch pad
+bool top = false;   //Global for detecting if top touch pad is pressed
+int leftPad  = 15;  //Left touch pad
+bool left = false;  //Global for detecting if left touch pad is pressed
+int rightPad = 16;  //Right touch pad
+bool right = false; //Global for detecting if right touch pad is pressed
+
+int LEDs[9]  = {2, 3, 4, 5, 6, 7, 8, 9, 10}; //All the LEDs except the star since I want that on all the time
+
+
+
+
+
 
 // notes of the melody followed by the duration.
 // a 4 means a quarter note, 8 an eighteenth , 16 sixteenth, so on
@@ -103,7 +113,8 @@ int divider = 0, noteDuration = 0; //Necessary for song playback
 /*
  * FUNCTION DEFINITIONS
 */
- 
+
+void checkInput();
 
 //Plays the melody on the buzzer
 //Passed the song name of the integer array for the desired song and the tempo
@@ -112,62 +123,126 @@ void playSong(int songName[], int tempo, int notes, int wholenote);
 
 void defaultLights();
 
-
+void initSongLights();
 
 
 
 void setup() {
 
+
 pinMode(topPad, INPUT);
 pinMode(leftPad, INPUT);
 pinMode(rightPad, INPUT);
+
+for(int i(0); i < sizeof(LEDs); ++i){
+  pinMode(LEDs[i], OUTPUT);
+}
+//Keep the star on all the time
+digitalWrite(11, HIGH);
 
 /*
 SoftPWMBegin();
 SoftPWMSet(2, 0);
 SoftPWMSet(3, 0);
 SoftPWMSet(4, 0);
- SoftPWMSet(5, 0);
- SoftPWMSet(6, 0);
- SoftPWMSet(7, 0);
- SoftPWMSet(8, 0);
- SoftPWMSet(9, 0);
- SoftPWMSet(10, 0);
- SoftPWMSet(11, 0);
- SoftPWMSetFadeTime(ALL, 500, 500);
-*/
+SoftPWMSet(5, 0);
+SoftPWMSet(6, 0);
+SoftPWMSet(7, 0);
+SoftPWMSet(8, 0);
+SoftPWMSet(9, 0);
+SoftPWMSet(10, 0);
+SoftPWMSet(11, 255); //Keep the star on
+
+ 
+ SoftPWMSetFadeTime(2, 500, 500);
+ SoftPWMSetFadeTime(3, 500, 500);
+ SoftPWMSetFadeTime(4, 500, 500);
+ SoftPWMSetFadeTime(5, 500, 500);
+ SoftPWMSetFadeTime(6, 500, 500);
+ SoftPWMSetFadeTime(7, 500, 500);
+ SoftPWMSetFadeTime(8, 500, 500);
+ SoftPWMSetFadeTime(9, 500, 500);
+ SoftPWMSetFadeTime(10, 500, 500);
+ */
 }
 
 void loop() {
-
-Serial.println(analogRead(topPad));
-
-  if(analogRead(topPad) <= 100 || analogRead(topPad) > 500){
+  
+  
+  if(top == true){
     playSong(carolOfTheBells, carolOfTheBellsTempo, notesCoB, wholenoteCoB);
-    delay(100);
-  }else if(analogRead(leftPad) <= 100 || analogRead(leftPad) > 500){
+    top = false;
+    left = false;
+    right = false;
+  }else if(left == true){
     playSong(weWishYouAMerryChristmas, weWishYouAMerryChristmasTempo, notesWYAMC, wholenoteWYAMC);
-    delay(100);
-  }else if(analogRead(rightPad) <= 100 || analogRead(rightPad) > 500){
+    top = false;
+    left = false;
+    right = false;
+  }else if(right == true){
     playSong(jingleBells, jingleBellsTempo, notesJB, wholenoteJB);
-    delay(100);
+    top = false;
+    left = false;
+    right = false;
   }else{
     defaultLights();
   }
 
   delay(50);
- 
 }
 
+//Checks to see if any of the pads are pressed
+void checkInput(){
+  if(analogRead(topPad) <= 40 || analogRead(topPad) > 650){
+   // playSong(carolOfTheBells, carolOfTheBellsTempo, notesCoB, wholenoteCoB);
+    top = true;
+    left = false;
+    right = false;
+    loop();
+  }else if(analogRead(leftPad) <= 100 || analogRead(leftPad) > 500){
+   // playSong(weWishYouAMerryChristmas, weWishYouAMerryChristmasTempo, notesWYAMC, wholenoteWYAMC);
+    top = false;
+    left = true;
+    right = false;
+    loop();
+  }else if(analogRead(rightPad) <= 100 || analogRead(rightPad) > 450){
+   // playSong(jingleBells, jingleBellsTempo, notesJB, wholenoteJB);
+    top = false;
+    left = false;     
+    right = true;
+    loop();
+  }else{
+    top = false;
+    left = false;
+    right = false;
+  }
+}
 
+void initSongLights(){
+  
+  digitalWrite(2, HIGH);
+  digitalWrite(3, HIGH);
+  digitalWrite(4, LOW);
+  digitalWrite(5, HIGH);
+  digitalWrite(6, LOW);
+  digitalWrite(7, LOW);
+  digitalWrite(8, HIGH);
+  digitalWrite(9, HIGH);
+  digitalWrite(10, LOW);
+}
 
 void playSong(int songName[], int tempo, int notes, int wholenote){
 
-
+  initSongLights();
 
   //Actually plays the song
   for (int thisNote = 0; thisNote < notes * 2; thisNote = thisNote + 2) {
 
+  //Just kinda randomly sets the lights on or off
+  for(int i(0); i < 9; ++i){
+    digitalWrite(LEDs[i], !digitalRead(LEDs[i])); //Should flip the direction of the LED (high/low)
+  }
+  
     // calculates the duration of each note
     divider = songName[thisNote + 1];
     if (divider > 0) {
@@ -192,16 +267,39 @@ void playSong(int songName[], int tempo, int notes, int wholenote){
 
 
 void defaultLights(){
-  /*
-    SoftPWMSet(ALL, 255);
+  //Could not get the soft pwm to behave with the buzzer
+/*
+  //Set all LEDs to 100%
+  for(int i(0); i < sizeof(LEDs); ++i){
+    SoftPWMSetPercent(LEDs[i], 100);
+    checkInput();
+  }
+
   // Wait for the fade-up and some extra delay.
   delay(1000);
-  
-  // Turn off WLED
-  SoftPWMSet(ALL, 0);
-  // Wait for the fade-down, and some extra delay.
+
+  //Set all LEDs (except for 11/the star) to 0%
+  for(int i(0); i < sizeof(LEDs) - 1; ++i){
+    SoftPWMSetPercent(LEDs[i], 0);
+    checkInput();
+  }
+  SoftPWMSetPercent(11, 100);
 
   delay(1000);
- */
+  */
+  //Keep the star on all the time
+  digitalWrite(11, HIGH);
+  for(int i(0); i < 9; ++i){
+    digitalWrite(LEDs[i], HIGH);
+    delay(100);
+    checkInput();
+  }
+  
+  delay(1000);
+  for(int i(0); i < 9; ++i){
+    digitalWrite(LEDs[i], 0);
+    delay(100);
+    checkInput();
+  }
   
 }
